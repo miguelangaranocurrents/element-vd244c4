@@ -52,6 +52,7 @@ import { shouldShowComponent } from "../customisations/helpers/UIComponents";
 import { TimelineRenderingType } from "../contexts/RoomContext";
 import { type ViewRoomPayload } from "../dispatcher/payloads/ViewRoomPayload";
 import { htmlSerializeFromMdIfNeeded } from "../editor/serialize";
+import Markdown from "../Markdown";
 import { leaveRoomBehaviour } from "../utils/leave-behaviour";
 import { MatrixClientPeg } from "../MatrixClientPeg";
 import { isCurrentLocalRoom, reject, singleMxcUpload, success, successSync, splitAtFirstSpace } from "./utils";
@@ -73,7 +74,9 @@ export const Commands = [
         args: "<message>",
         description: _td("slash_command|spoiler"),
         runFn: function (cli, roomId, threadId, message = "") {
-            return successSync(ContentHelpers.makeHtmlMessage(message, `<span data-mx-spoiler>${message}</span>`));
+            // Render the spoiler text as Markdown so formatting such as **bold** survives inside the spoiler.
+            const html = new Markdown(message).toHTML();
+            return successSync(ContentHelpers.makeHtmlMessage(message, `<span data-mx-spoiler>${html}</span>`));
         },
         category: CommandCategories.messages,
     }),
